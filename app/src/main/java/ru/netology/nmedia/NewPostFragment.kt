@@ -36,11 +36,11 @@ class NewPostFragment : Fragment() {
         binding.edit.setText(content)
         binding.edit.requestFocus()
 
-        viewModel.getDraft()?.let(binding.edit::setText)
+//        viewModel.getDraft()?.let(binding.edit::setText)
 
 
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            viewModel.saveDraft(binding.edit.text.toString())
+//            viewModel.saveDraft(binding.edit.text.toString())
             remove()
             requireActivity().onBackPressed()
         }

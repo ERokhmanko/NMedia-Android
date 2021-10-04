@@ -48,7 +48,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: IOException) {
                 // Получена ошибка
                 FeedModel(error = true)
-            }.also { _data::postValue }
+            }.also(_data::postValue)
         }
     }
 
@@ -57,7 +57,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             thread {
                 repository.save(it)
                 _postCreated.postValue(Unit)
-                repository.saveDraft(null) //??
+//                repository.saveDraft(null) //??
             }
         }
         edited.value = emptyPost
@@ -75,7 +75,18 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value = post
     }
 
-    fun likeById(id: Long) = thread { repository.likedById(id) }
+    fun likeById(id: Long) = thread {
+        repository.likedById(id)
+        loadPosts()
+    }
+
+    fun unlikeById(id: Long) {
+        thread {
+            repository.unlikeById(id)
+            loadPosts()
+        }
+    }
+
     fun shareById(id: Long) = repository.shareById(id)
     fun removeById(id: Long) {
         thread {
@@ -87,7 +98,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             )
             try {
                 repository.removeById(id)
-            } catch (e: IOException){
+            } catch (e: IOException) {
                 _data.postValue(_data.value?.copy(posts = old))
             }
         }
@@ -97,7 +108,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //        repository.cancelEditing(it)
     }
 
-    fun saveDraft(draft: String?) = repository.saveDraft(draft)
-    fun getDraft(): String? = repository.getDraft()
+//    fun saveDraft(draft: String?) = repository.saveDraft(draft)
+//    fun getDraft(): String? = repository.getDraft()
 
 }

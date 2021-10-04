@@ -35,8 +35,9 @@ class FeedFragment : Fragment() {
         val bundle = Bundle()
 
         val adapter = PostsAdapter(object : PostCallback {
+
             override fun onLike(post: Post) {
-                viewModel.likeById(post.id)
+                if (!post.likedByMe) viewModel.likeById(post.id) else viewModel.unlikeById(post.id)
             }
 
 
@@ -82,7 +83,7 @@ class FeedFragment : Fragment() {
         binding.list.adapter = adapter
         binding.list.animation = null // отключаем анимацию
 
-        viewModel.data.observe(viewLifecycleOwner) { state ->
+        viewModel.data.observe(viewLifecycleOwner, { state ->
             val listComparison = adapter.itemCount < state.posts.size
             adapter.submitList(state.posts) {
                 if (listComparison) binding.list.scrollToPosition(0)
@@ -90,7 +91,7 @@ class FeedFragment : Fragment() {
             binding.progress.isVisible = state.loading
             binding.errorGroup.isVisible = state.error
             binding.emptyText.isVisible = state.empty
-        }
+        } )
 //        { posts ->
 //            val listComparison = adapter.itemCount < posts.size
 //            adapter.submitList(posts) {
