@@ -12,8 +12,10 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.android.synthetic.main.card_post.*
 import kotlinx.android.synthetic.main.card_post.view.*
+import kotlinx.android.synthetic.main.fragment_feed.*
 import ru.netology.nmedia.adapter.PostCallback
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
@@ -86,7 +88,7 @@ class FeedFragment : Fragment() {
         viewModel.data.observe(viewLifecycleOwner, { state ->
             val listComparison = adapter.itemCount < state.posts.size
             adapter.submitList(state.posts) {
-                if (listComparison) binding.list.scrollToPosition(0)
+//                if (listComparison) binding.list.scrollToPosition(0)
             }
             binding.progress.isVisible = state.loading
             binding.errorGroup.isVisible = state.error
@@ -114,6 +116,10 @@ class FeedFragment : Fragment() {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
 
+        binding.swiperefresh.setOnRefreshListener{
+            viewModel.loadPosts()
+            swiperefresh.isRefreshing = false
+        }
 
         return binding.root
     }

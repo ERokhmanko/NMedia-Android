@@ -4,17 +4,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
-import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
-import ru.netology.nmedia.SinglePostFragment
 import ru.netology.nmedia.databinding.CardPostBinding
-import ru.netology.nmedia.databinding.FragmentSinglePostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.utils.Utils
-import java.util.zip.Inflater
 
 interface PostCallback {
     fun onLike(post: Post)
@@ -51,14 +47,12 @@ class PostViewHolder(
             author.text = post.author
             content.text = post.content
             published.text = post.published
-            like.text = Utils.reductionInNumbers(post.likesCount)
+            like.text = Utils.reductionInNumbers(post.likes)
             share.text = Utils.reductionInNumbers(post.sharesCount)
             like.isChecked = post.likedByMe
-//            like.setButtonDrawable(
-//                if (post.likedByMe) R.drawable.ic_baseline_favorite_24
-//                else R.drawable.ic_baseline_favorite_border_24
-//            )
-            if (post.video != "") group.visibility = View.VISIBLE
+
+            if (post.video == "") group.visibility = View.VISIBLE //можно ли сделать так,
+            // чтобы не отображалось видео вью или только с изменениями на серваке?
 
             like.setOnClickListener {
                 postCallback.onLike(post)

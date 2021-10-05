@@ -41,7 +41,7 @@ class SinglePostFragment : Fragment() {
                 content.text = singlePost?.content
                 published.text = singlePost?.published
 
-                like.text = singlePost?.let { it -> Utils.reductionInNumbers(it.likesCount) }
+                like.text = singlePost?.let { it -> Utils.reductionInNumbers(it.likes) }
                 share.text = singlePost?.sharesCount?.let { it ->
                     Utils.reductionInNumbers(
                         it
