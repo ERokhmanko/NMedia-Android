@@ -17,8 +17,15 @@ import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.viewmodel.PostViewModel
 import androidx.activity.addCallback
+import ru.netology.nmedia.util.StringArg
+import ru.netology.nmedia.utils.Utils
 
 class NewPostFragment : Fragment() {
+
+    companion object {
+        var Bundle.textArg: String? by StringArg
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,28 +43,31 @@ class NewPostFragment : Fragment() {
         binding.edit.setText(content)
         binding.edit.requestFocus()
 
+//            на сервере не реализованы черновики. проэтому пока скрываем
 //        viewModel.getDraft()?.let(binding.edit::setText)
 
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+//        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
 //            viewModel.saveDraft(binding.edit.text.toString())
-            remove()
-            requireActivity().onBackPressed()
-        }
-
+//            remove()
+//            requireActivity().onBackPressed()
+//        }
 
         binding.ok.setOnClickListener {
 
             val content = binding.edit.text.toString()
             viewModel.changeContent(content)
             viewModel.save()
-            findNavController().navigate(R.id.action_newPostFragment_to_feedFragment)
+//            findNavController().navigate(R.id.action_newPostFragment_to_feedFragment)
+// эта строка оказалось лишней при работе с сервером
         }
+
 
         viewModel.postCreated.observe(viewLifecycleOwner){
             viewModel.loadPosts()
             findNavController().navigateUp()
         }
+
 
         return binding.root
     }

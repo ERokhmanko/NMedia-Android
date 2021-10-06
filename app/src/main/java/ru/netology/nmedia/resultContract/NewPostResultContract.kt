@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import ru.netology.nmedia.NewPostFragment
 
+
 class NewPostResultContract : ActivityResultContract<String, String?>() {
 
     override fun createIntent(context: Context, input: String?): Intent =
