@@ -69,12 +69,12 @@ class PostViewHolder(
                             .load("http://10.0.2.2:9999/images/${post.attachment?.url}")
                             .timeout(10_000)
                             .into(viewForImage)
+                        viewForImage.visibility =View.VISIBLE
                     }
                    // если добавить ветку else, то что указать?
                 }
 
             if (!post.video.isNullOrBlank()) group.visibility = View.VISIBLE
-            if (post.attachment != null) viewForImage.visibility = View.VISIBLE
 
             like.setOnClickListener {
                 postCallback.onLike(post)
