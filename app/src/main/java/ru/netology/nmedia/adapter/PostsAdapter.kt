@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -63,16 +64,16 @@ class PostViewHolder(
                 .into(avatar)
 
 
-                when (post.attachment?.type){
-                    AttachmentType.IMAGE ->{
+                when (post.attachment?.type) {
+                    AttachmentType.IMAGE -> {
                         Glide.with(viewForImage)
                             .load("http://10.0.2.2:9999/images/${post.attachment?.url}")
                             .timeout(10_000)
                             .into(viewForImage)
-                        viewForImage.visibility =View.VISIBLE
                     }
-                   // если добавить ветку else, то что указать?
                 }
+            viewForImage.isVisible = post.attachment?.type == AttachmentType.IMAGE
+
 
             if (!post.video.isNullOrBlank()) group.visibility = View.VISIBLE
 
