@@ -59,18 +59,6 @@ data class DraftEntity(
     val content: String
 )
 
-
-//data class AttachmentEmbeddable(
-//    var url: String,
-//    var description: String,
-//    var type: AttachmentType,
-//) {
-//    fun toDto() = Attachment(url, description, type)
-//
-//    companion object {
-//        fun fromDto(dto: Attachment?) = dto?.let {
-//            AttachmentEmbeddable(it.url, it.description, it.type)
-//        }
-//    }
-//}
+fun List<PostEntity>.toDto() = map(PostEntity::toDto)
+fun List<Post>.toEntity() = map(PostEntity::fromDto)
 
