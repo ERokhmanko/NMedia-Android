@@ -1,17 +1,15 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
-import kotlinx.coroutines.launch
-
+import kotlinx.coroutines.*
+import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.model.FeedModelState
 
 private val emptyPost = Post(
     id = 0,
@@ -26,10 +24,17 @@ private val emptyPost = Post(
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: PostRepository = PostRepositoryImpl()
-    private val _data = MutableLiveData(FeedModel())
+    private val repository: PostRepository =
+        PostRepositoryImpl(AppDb.getInstance(context = application).postDao())
+
+    private val _data = repository.data.map { FeedModel(posts = it, empty = it.isEmpty()) }
     val data: LiveData<FeedModel>
         get() = _data
+
+    private val _dataState = MutableLiveData<FeedModelState>()
+    val dataState: LiveData<FeedModelState>
+        get() = _dataState
+
     val edited = MutableLiveData(emptyPost)
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
@@ -41,28 +46,39 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         loadPosts()
     }
 
-    fun loadPosts() {
-        _data.value = FeedModel(loading = true)
-        viewModelScope.launch {
-            val posts = repository.getAll()
-            _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+    fun loadPosts() = viewModelScope.launch {
+        try {
+            _dataState.value = FeedModelState(loading = true)
+            repository.getAll()
+            _dataState.value = FeedModelState()
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)
+        }
+    }
+
+    fun refreshPosts() = viewModelScope.launch {
+        try {
+            _dataState.value = FeedModelState(refreshing = true)
+            repository.getAll()
+            _dataState.value = FeedModelState()
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)
         }
     }
 
     fun save() {
         edited.value?.let {
-//            repository.save(it, object : PostRepository.PostCallback {
-//                override fun onSuccess(post: Post) {
-//                    _postCreated.postValue(Unit)
-////                    repository.saveDraft(null) //на сервере не реализован черновик
-//                }
-//
-//                override fun onError(e: Exception) {
-//                    _data.postValue(_data.value?.copy(posts = old))
-//                }
-//            })
-//        }
-//        edited.value = emptyPost
+//        _postCreated.value = Unit
+        viewModelScope.launch {
+            try {
+                repository.save(it)
+                _dataState.value = FeedModelState()
+            } catch (e: Exception) {
+                _dataState.value = FeedModelState(error = true)
+            }
+        }
+    }
+        edited.value = emptyPost
     }
 
     fun changeContent(content: String) {
@@ -114,7 +130,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //        })
     }
 
-    fun shareById(id: Long) = repository.shareById(id)
+    fun shareById(id: Long) {
+//            repository.shareById(id)
+    }
+
     fun removeById(id: Long) {
 //        repository.removeById(id, object : PostRepository.IdCall {
 //            override fun onSuccess(unit: Unit) {
@@ -132,12 +151,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
 
-        fun cancelEditing() = edited.value?.let {
+    fun cancelEditing() = edited.value?.let {
 //        repository.cancelEditing(it)
-        }
+    }
+
 
 //    fun saveDraft(draft: String?) = repository.saveDraft(draft)
 //    fun getDraft(): String? = repository.getDraft()
 
-    }
 }

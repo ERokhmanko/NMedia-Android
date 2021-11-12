@@ -16,6 +16,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.card_post.*
 import kotlinx.android.synthetic.main.card_post.view.*
 import kotlinx.android.synthetic.main.fragment_feed.*
@@ -94,15 +95,25 @@ class FeedFragment : Fragment() {
             adapter.submitList(state.posts) {
                 if (listComparison) binding.list.scrollToPosition(0)
             }
-            binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible = state.error
             binding.emptyText.isVisible = state.empty
         } )
 
-
-        binding.retryButton.setOnClickListener {
-            viewModel.loadPosts()
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
+            binding.progress.isVisible = state.loading
+            binding.swiperefresh.isRefreshing = state.refreshing
+            if (state.error){
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG).show()
+            }
         }
+
+        binding.swiperefresh.setOnRefreshListener {
+            viewModel.refreshPosts()
+        }
+
+//
+//        binding.retryButton.setOnClickListener {
+//            viewModel.loadPosts()
+//        }
 
         viewModel.edited.observe(viewLifecycleOwner) { post ->
             if (post.id == 0L) {
