@@ -9,6 +9,7 @@ import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
 import kotlinx.coroutines.*
 import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.enumeration.RetryType
 import ru.netology.nmedia.model.FeedModelState
 
 private val emptyPost = Post(
@@ -39,8 +40,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
         get() = _postCreated
-    val old = _data.value?.posts.orEmpty()
-    val avatars = emptyList<String>()
 
     init {
         loadPosts()
@@ -68,17 +67,18 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun save() {
         edited.value?.let {
-//        _postCreated.value = Unit
-        viewModelScope.launch {
-            try {
-                repository.save(it)
-                _dataState.value = FeedModelState()
-            } catch (e: Exception) {
-                _dataState.value = FeedModelState(error = true)
+            viewModelScope.launch {
+                try {
+                    _postCreated.value = Unit
+                    repository.save(it)
+                    _dataState.value = FeedModelState()
+                } catch (e: Exception) {
+                    _dataState.value = FeedModelState(error = true)
+                }
             }
         }
-    }
         edited.value = emptyPost
+
     }
 
     fun changeContent(content: String) {
@@ -93,7 +93,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value = post
     }
 
-    fun likeById(id: Long) {
+    fun likeById(id: Long)  = viewModelScope.launch {
+        try {
+            repository.likedById(id)
+        } catch (e: Exception) {
+            _dataState.value =
+                FeedModelState(error = true, retryType = RetryType.LIKE, retryId = id)
+        }
+    }
 //        repository.likedById(id, object : PostRepository.PostCallback {
 //            override fun onSuccess(post: Post) {
 //                _data.postValue(
@@ -109,7 +116,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //                _data.postValue(_data.value?.copy(posts = old))
 //            }
 //        })
-    }
 
 
     fun unlikeById(id: Long) {
@@ -134,20 +140,13 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //            repository.shareById(id)
     }
 
-    fun removeById(id: Long) {
-//        repository.removeById(id, object : PostRepository.IdCall {
-//            override fun onSuccess(unit: Unit) {
-//                _data.postValue(
-//                    _data.value?.copy(posts = _data.value?.posts.orEmpty()
-//                        .filter { it.id != id }
-//                    )
-//                )
-//            }
-//
-//            override fun onError(e: Exception) {
-//                _data.postValue(_data.value?.copy(posts = old))
-//            }
-//        })
+    fun removeById(id: Long)  = viewModelScope.launch {
+        try {
+            repository.removeById(id)
+        } catch (e: Exception) {
+            _dataState.value =
+                FeedModelState(error = true, retryType = RetryType.REMOVE, retryId = id)
+        }
     }
 
 

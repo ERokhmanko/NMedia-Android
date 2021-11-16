@@ -27,11 +27,6 @@ private val retrofit = Retrofit.Builder()
     .client(okhttp)
     .build()
 
-//private const val BASE_URL = "http://10.0.2.2:9999/api/"
-//private val retrofit = Retrofit.Builder()
-//    .addConverterFactory(GsonConverterFactory.create())
-//    .baseUrl(BASE_URL)
-//    .build()
 
 interface PostApiService {
     @GET("posts")

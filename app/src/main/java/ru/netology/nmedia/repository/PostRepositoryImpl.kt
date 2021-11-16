@@ -34,7 +34,21 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
     }
 
     override suspend fun likedById(id: Long) {
-        PostApi.retrofitService.likedById(id)
+        try {
+            postDao.likedById(id)
+            val response =  PostApi.retrofitService.likedById(id)
+            if (!response.isSuccessful){
+                throw ApiError(response.code(), response.message())
+            }
+
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            postDao.insert(PostEntity.fromDto(body))
+        }
+        catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
     }
 
     override suspend fun unlikeById(id: Long) {
@@ -42,11 +56,36 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
     }
 
     override suspend fun removeById(id: Long) {
-        PostApi.retrofitService.removeById(id)
+        try {
+            postDao.removeById(id)
+            val response = PostApi.retrofitService.removeById(id)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
     }
 
     override suspend fun save(post: Post) {
-        PostApi.retrofitService.save(post)
+        try {
+//            postDao.save(PostEntity.fromDto(post))
+            val response = PostApi.retrofitService.save(post)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            postDao.insert(PostEntity.fromDto(body))
+
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
     }
 
     override suspend fun shareById(id: Long) {
