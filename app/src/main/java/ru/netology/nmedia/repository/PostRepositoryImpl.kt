@@ -53,7 +53,7 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
 
     override suspend fun unlikeById(id: Long) {
         try {
-            postDao.likedById(id)
+            postDao.unlikedById(id)
             val response = PostApi.retrofitService.unlikeById(id)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
