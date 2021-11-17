@@ -8,6 +8,7 @@ import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
 import kotlinx.coroutines.*
+import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.enumeration.RetryType
 import ru.netology.nmedia.model.FeedModelState
@@ -65,6 +66,20 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun retrySave(post: Post?) {
+        viewModelScope.launch {
+            try {
+                if (post != null) {
+                    PostApi.retrofitService.save(post)
+                    refreshPosts()
+                }
+            } catch (e: Exception) {
+                _dataState.value =
+                    FeedModelState(error = true, retryType = RetryType.SAVE, retryPost = post)
+            }
+        }
+    }
+
     fun save() {
         edited.value?.let {
             viewModelScope.launch {
@@ -101,39 +116,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 FeedModelState(error = true, retryType = RetryType.LIKE, retryId = id)
         }
     }
-//        repository.likedById(id, object : PostRepository.PostCallback {
-//            override fun onSuccess(post: Post) {
-//                _data.postValue(
-//                    _data.value?.copy(posts = _data.value?.posts.orEmpty()
-//                        .map {
-//                            if (it.id == id) post else it
-//                        }
-//                    )
-//                )
-//            }
-//
-//            override fun onError(e: Exception) {
-//                _data.postValue(_data.value?.copy(posts = old))
-//            }
-//        })
 
-
-    fun unlikeById(id: Long) {
-//        repository.unlikeById(id, object : PostRepository.PostCallback {
-//            override fun onSuccess(post: Post) {
-//                _data.postValue(
-//                    _data.value?.copy(posts = _data.value?.posts.orEmpty()
-//                        .map {
-//                            if (it.id == id) post else it
-//                        }
-//                    )
-//                )
-//            }
-//
-//            override fun onError(e: Exception) {
-//                _data.postValue(_data.value?.copy(posts = old))
-//            }
-//        })
+    fun unlikeById(id: Long)= viewModelScope.launch {
+        try {
+            repository.unlikeById(id)
+        } catch (e: Exception) {
+            _dataState.value =
+                FeedModelState(error = true, retryType = RetryType.UNLIKE, retryId = id)
+        }
     }
 
     fun shareById(id: Long) {

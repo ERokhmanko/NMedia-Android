@@ -52,7 +52,19 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
     }
 
     override suspend fun unlikeById(id: Long) {
-        PostApi.retrofitService.unlikeById(id)
+        try {
+            postDao.likedById(id)
+            val response = PostApi.retrofitService.unlikeById(id)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+            val data = response.body() ?: throw ApiError(response.code(), response.message())
+            postDao.insert(PostEntity.fromDto(data))
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
     }
 
     override suspend fun removeById(id: Long) {
@@ -72,7 +84,6 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
 
     override suspend fun save(post: Post) {
         try {
-//            postDao.save(PostEntity.fromDto(post))
             val response = PostApi.retrofitService.save(post)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())

@@ -23,6 +23,7 @@ import kotlinx.android.synthetic.main.fragment_feed.*
 import ru.netology.nmedia.adapter.PostCallback
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
+import ru.netology.nmedia.enumeration.RetryType
 
 
 class FeedFragment : Fragment() {
@@ -101,8 +102,18 @@ class FeedFragment : Fragment() {
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
             binding.swiperefresh.isRefreshing = state.refreshing
-            if (state.error){
-                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG).show()
+            if (state.error) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.retry_loading) {
+                        when (state.retryType) {
+                            RetryType.SAVE -> viewModel.retrySave(state.retryPost)
+                            RetryType.REMOVE -> viewModel.removeById(state.retryId)
+                            RetryType.LIKE -> viewModel.likeById(state.retryId)
+                            RetryType.UNLIKE -> viewModel.unlikeById(state.retryId)
+                            else -> viewModel.refreshPosts()
+                        }
+                    }
+                    .show()
             }
         }
 
