@@ -1,5 +1,6 @@
 package ru.netology.nmedia.api
 
+
 import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -18,7 +19,7 @@ import retrofit2.http.FormUrlEncoded
 import ru.netology.nmedia.dto.User
 
 
-private const val BASE_URL = "http://10.0.2.2:9999/api/"
+private const val BASE_URL = "http://10.0.2.2:9999/api/users"
 
 private val logging = HttpLoggingInterceptor().apply {
     if (BuildConfig.DEBUG) {
@@ -46,31 +47,10 @@ private val retrofit = Retrofit.Builder()
     .build()
 
 
-interface PostApiService {
-    @GET("posts")
-    suspend fun getAll(): Response<List<Post>>
-
-    @GET("posts/{id}/newer")
-    suspend fun getNewer(@Path("id") id: Long): Response<List<Post>>
-
-    @POST("posts/{id}/likes")
-    suspend fun likedById(@Path("id") id: Long): Response<Post>
-
-    @DELETE("posts/{id}/likes")
-    suspend fun unlikeById(@Path("id") id: Long): Response<Post>
-
-    @DELETE("posts/{id}")
-    suspend fun removeById(@Path("id") id: Long): Response<Unit>
-
-    @POST("posts")
-    suspend fun save(@Body post: Post): Response<Post>
-
-    @Multipart
-    @POST("media")
-    suspend fun upload(@Part media: MultipartBody.Part): Response<Media>
+interface UserApiService {
 
     @FormUrlEncoded
-    @POST("users/authentication")
+    @POST("/authentication")
     suspend fun authUser(
         @Field("login") login: String?,
         @Field("pass") password: String?
@@ -78,8 +58,8 @@ interface PostApiService {
 }
 
 
-object PostApi {
-    val retrofitService: PostApiService by lazy {
-        retrofit.create(PostApiService::class.java)
+object UserApi {
+    val retrofitService: UserApiService by lazy {
+        retrofit.create(UserApiService::class.java)
     }
 }

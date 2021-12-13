@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.viewModels
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import ru.netology.nmedia.dto.Post
@@ -23,6 +24,8 @@ import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.enumeration.RetryType
 import ru.netology.nmedia.R.string.new_posts
+import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.viewmodel.AuthViewModel
 
 
 class FeedFragment : Fragment() {
@@ -38,12 +41,24 @@ class FeedFragment : Fragment() {
             ownerProducer = ::requireParentFragment
         )
 
+        val viewModelAuth: AuthViewModel by viewModels()
+
         val bundle = Bundle()
+
 
         val adapter = PostsAdapter(object : PostCallback {
 
             override fun onLike(post: Post) {
-                if (!post.likedByMe) viewModel.likeById(post.id) else viewModel.unlikeById(post.id)
+                if (viewModelAuth.authenticated) {
+                    if (!post.likedByMe) viewModel.likeById(post.id) else viewModel.unlikeById(post.id)
+                } else {
+                    findNavController().navigate(R.id.action_feedFragment_to_authFragment)
+                    if (viewModelAuth.authenticated) {
+                        if (!post.likedByMe) viewModel.likeById(post.id) else viewModel.unlikeById(
+                            post.id
+                        )
+                    }
+                }
             }
 
 
@@ -86,7 +101,10 @@ class FeedFragment : Fragment() {
 
             override fun onImage(post: Post) {
                 bundle.putString("url", post.attachment?.url)
-                findNavController().navigate(R.id.action_feedFragment_to_singleImageFragment, bundle)
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_singleImageFragment,
+                    bundle
+                )
             }
 
         })
@@ -101,7 +119,7 @@ class FeedFragment : Fragment() {
                 if (listComparison) binding.list.scrollToPosition(0)
             }
             binding.emptyText.isVisible = state.empty
-        } )
+        })
 
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
             binding.progress.isVisible = state.loading
@@ -153,11 +171,15 @@ class FeedFragment : Fragment() {
         }
 
         binding.floatingActionButton.setOnClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            if (viewModelAuth.authenticated) {
+                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            } else {
+                findNavController().navigate(R.id.action_feedFragment_to_authFragment)
+            }
         }
 
 
-        binding.swiperefresh.setOnRefreshListener{
+        binding.swiperefresh.setOnRefreshListener {
             viewModel.loadPosts()
             swiperefresh.isRefreshing = false
         }

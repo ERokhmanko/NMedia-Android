@@ -24,6 +24,7 @@ import com.github.dhaval2404.imagepicker.ImagePicker
 import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import ru.netology.nmedia.util.StringArg
 import ru.netology.nmedia.utils.Utils
+import ru.netology.nmedia.viewmodel.AuthViewModel
 
 class NewPostFragment : Fragment() {
 
@@ -34,6 +35,8 @@ class NewPostFragment : Fragment() {
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
     )
+
+    private val viewModelAuth: AuthViewModel by viewModels()
 
     private var fragmentBinding: FragmentNewPostBinding? = null
 
@@ -50,10 +53,14 @@ class NewPostFragment : Fragment() {
         val content = arguments?.getString("content")
         return when (item.itemId) {
             R.id.save -> {
-                fragmentBinding?.let {
-                    viewModel.changeContent(it.edit.text.toString())
-                    viewModel.save()
-                    Utils.hideKeyboard(requireView())
+                if (viewModelAuth.authenticated) {
+                    fragmentBinding?.let {
+                        viewModel.changeContent(it.edit.text.toString())
+                        viewModel.save()
+                        Utils.hideKeyboard(requireView())
+                    }
+                } else {
+                    findNavController().navigate(R.id.action_newPostFragment_to_authFragment)
                 }
                 true
             }
@@ -70,7 +77,7 @@ class NewPostFragment : Fragment() {
         fragmentBinding = binding
 
         val content = arguments?.getString("content")
-//        binding.edit.setText(content)
+        binding.edit.setText(content)
         binding.edit.requestFocus()
 
         val pickPhotoLauncher =
