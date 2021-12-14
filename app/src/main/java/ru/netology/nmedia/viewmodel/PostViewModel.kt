@@ -160,7 +160,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         } catch (e: Exception) {
             _dataState.value =
                 FeedModelState(error = true, retryType = RetryType.LIKE, retryId = id)
-            println("ellina $e")
         }
     }
 

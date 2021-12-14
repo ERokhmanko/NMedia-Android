@@ -75,6 +75,14 @@ interface PostApiService {
         @Field("login") login: String?,
         @Field("pass") password: String?
     ): Response<User>
+
+    @FormUrlEncoded
+    @POST("users/registration")
+    suspend fun registrationUser(
+        @Field("login") login: String?,
+        @Field("pass") password: String?,
+        @Field("name") name: String
+    ): Response<User>
 }
 
 

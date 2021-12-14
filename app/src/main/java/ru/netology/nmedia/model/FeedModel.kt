@@ -16,5 +16,4 @@ data class FeedModelState(
     val retryId: Long = 0,
     val retryPost: Post? = null,
     val errorLogin: Boolean = false
-
 )

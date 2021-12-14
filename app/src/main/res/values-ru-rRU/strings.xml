@@ -27,4 +27,5 @@
     <string name="error_auth">"Неверные логин или пароль "</string>
     <string name="name">Имя</string>
     <string name="repeatPassword">Повторите пароль</string>
+    <string name="error_pass_mismatch">Пароли не совпадают</string>
 </resources>

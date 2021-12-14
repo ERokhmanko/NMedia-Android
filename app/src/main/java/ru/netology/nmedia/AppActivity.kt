@@ -35,17 +35,17 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 //                finish()
 //            }.show()
 //        }
-                intent?.let {
-                    val text = it.getStringExtra(Intent.EXTRA_TEXT)
-                    if (text?.isNotBlank() != true) {
-                        return@let
-                    }
-                }
-
-            viewModel.data.observe(this) {
-                invalidateOptionsMenu()
+        intent?.let {
+            val text = it.getStringExtra(Intent.EXTRA_TEXT)
+            if (text?.isNotBlank() != true) {
+                return@let
             }
         }
+
+        viewModel.data.observe(this) {
+            invalidateOptionsMenu()
+        }
+    }
 
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -58,19 +58,17 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem) : Boolean {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.sign_in -> {
-               findNavController(R.id.app_activity_fragment_container).navigate(R.id.action_feedFragment_to_authFragment)
+                findNavController(R.id.app_activity_fragment_container).navigate(R.id.action_feedFragment_to_authFragment)
                 true
             }
             R.id.sign_up -> {
-                // TODO: just hardcode it, implementation must be in homework
-                AppAuth.getInstance().setAuth(5, "x-token")
+                findNavController(R.id.app_activity_fragment_container).navigate(R.id.action_feedFragment_to_signUpFragment)
                 true
             }
             R.id.sign_out -> {
-                // TODO: just hardcode it, implementation must be in homework
                 AppAuth.getInstance().removeAuth()
                 true
             }

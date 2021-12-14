@@ -17,7 +17,7 @@ class SignInFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val binding = SignInFragmentBinding.inflate(inflater, container, false)
 
         val viewModel: SignInViewModel by viewModels()
@@ -38,6 +38,10 @@ class SignInFragment : Fragment() {
                 binding.loginField.editText?.text.toString(),
                 binding.passwordField.editText?.text.toString()
             )
+        }
+
+        binding.transitionSignUp.setOnClickListener {
+            findNavController().navigate(R.id.action_signInFragment_to_signUpFragment)
         }
 
         return binding.root
