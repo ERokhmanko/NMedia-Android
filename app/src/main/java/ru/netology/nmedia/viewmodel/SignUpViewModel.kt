@@ -13,6 +13,7 @@ import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
+import ru.netology.nmedia.repository.AuthRepository
 import java.io.File
 import java.io.IOException
 
@@ -25,31 +26,20 @@ class SignUpViewModel : ViewModel() {
     val dataState: LiveData<FeedModelState>
         get() = _dataState
 
-    private val noPhoto = PhotoModel()
-    private val _photo = MutableLiveData(noPhoto)
-    val photo: LiveData<PhotoModel>
-        get() = _photo
+    private val repository = AuthRepository()
 
     fun registrationUser(login: String, password: String, name: String) {
         viewModelScope.launch {
             try {
-                val response = PostApi.retrofitService.registrationUser(login, password, name)
-                if (!response.isSuccessful) {
-                    throw ApiError(response.code(), response.message())
-                }
-                val body = response.body() ?: throw Exception()
-                _data.value = body
-            } catch (e: IOException) {
-                throw NetworkError
+                val user = repository.registrationUser(login, password, name)
+                _data.value = user
             } catch (e: Exception) {
-                throw UnknownError()
+                _dataState.postValue(FeedModelState(errorRegistration = true))
             }
         }
 
     }
 
-    fun changePhoto(uri: Uri?, file: File?) {
-        _photo.value = PhotoModel(uri, file)
-    }
+
 
 }

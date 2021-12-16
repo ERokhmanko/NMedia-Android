@@ -20,21 +20,6 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-//        val binding = ActivityAppBinding.inflate(layoutInflater)
-//        setContentView(binding.root)
-
-//        intent?.let {
-//            if (it.action != Intent.ACTION_SEND) return@let
-//
-//            val text = it.getStringExtra(Intent.EXTRA_TEXT)
-//            if (text.isNullOrBlank()) Snackbar.make(
-//                binding.root, R.string.error_empty_content,
-//                LENGTH_INDEFINITE
-//            ).setAction(android.R.string.ok) {
-//                finish()
-//            }.show()
-//        }
         intent?.let {
             val text = it.getStringExtra(Intent.EXTRA_TEXT)
             if (text?.isNotBlank() != true) {
