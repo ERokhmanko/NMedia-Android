@@ -8,13 +8,13 @@ import retrofit2.http.*
 import ru.netology.nmedia.dto.Post
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Call
 import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Media
 import retrofit2.http.POST
 
 import retrofit2.http.FormUrlEncoded
+import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.dto.User
 
 
@@ -46,7 +46,10 @@ private val retrofit = Retrofit.Builder()
     .build()
 
 
-interface PostApiService {
+interface ApiService {
+    @POST("users/push-tokens")
+    suspend fun save(@Body pushToken: PushToken): Response<Unit>
+
     @GET("posts")
     suspend fun getAll(): Response<List<Post>>
 
@@ -86,8 +89,8 @@ interface PostApiService {
 }
 
 
-object PostApi {
-    val retrofitService: PostApiService by lazy {
-        retrofit.create(PostApiService::class.java)
+object Api {
+    val retrofitService: ApiService by lazy {
+        retrofit.create(ApiService::class.java)
     }
 }

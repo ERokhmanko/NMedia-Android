@@ -1,16 +1,16 @@
-package ru.netology.nmedia
+package ru.netology.nmedia.activity
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.viewModels
-import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_INDEFINITE
-import com.google.android.material.snackbar.Snackbar
-import ru.netology.nmedia.databinding.ActivityAppBinding
 import android.view.Menu
 import android.view.MenuItem
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
+import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.FirebaseMessaging
+import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.viewmodel.AuthViewModel
 
@@ -29,6 +29,10 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
         viewModel.data.observe(this) {
             invalidateOptionsMenu()
+        }
+
+        FirebaseMessaging.getInstance().token.addOnSuccessListener {
+            println("ellina $it")
         }
     }
 

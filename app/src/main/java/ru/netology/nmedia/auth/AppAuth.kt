@@ -1,9 +1,17 @@
 package ru.netology.nmedia.auth
 
 import android.content.Context
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import ru.netology.nmedia.api.Api
+import ru.netology.nmedia.dto.PushToken
 
 class AppAuth private constructor(context: Context) {
     private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
@@ -25,27 +33,43 @@ class AppAuth private constructor(context: Context) {
         } else {
             _authStateFlow = MutableStateFlow(AuthState(id, token))
         }
+
+        sendPushToken()
     }
 
     val authStateFlow: StateFlow<AuthState> = _authStateFlow.asStateFlow()
 
-    @Synchronized
-    fun setAuth(id: Long, token: String){
-        _authStateFlow.value = AuthState(id, token)
-        with(prefs.edit()){
-            putLong(idKey, id)
-            putString(tokenKey, token)
-            apply()
+    fun sendPushToken(token: String? = null) {
+        CoroutineScope(Dispatchers.Default).launch {
+            try {
+                val token = PushToken(token ?: Firebase.messaging.token.await())
+                Api.retrofitService.save(token)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     @Synchronized
-    fun removeAuth(){
+    fun setAuth(id: Long, token: String) {
+        _authStateFlow.value = AuthState(id, token)
+        with(prefs.edit()) {
+            putLong(idKey, id)
+            putString(tokenKey, token)
+            apply()
+        }
+        sendPushToken()
+
+    }
+
+    @Synchronized
+    fun removeAuth() {
         _authStateFlow.value = AuthState()
-        with(prefs.edit()){
+        with(prefs.edit()) {
             clear()
             commit()
         }
+        sendPushToken()
     }
 
     companion object {

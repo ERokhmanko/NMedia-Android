@@ -1,4 +1,4 @@
-package ru.netology.nmedia
+package ru.netology.nmedia.activity
 
 import android.content.Intent
 import android.net.Uri
@@ -6,8 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.viewModels
-import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
@@ -19,12 +17,11 @@ import kotlinx.android.synthetic.main.card_post.*
 import kotlinx.android.synthetic.main.card_post.view.*
 import kotlinx.android.synthetic.main.fragment_feed.*
 import kotlinx.android.synthetic.main.fragment_feed.view.*
+import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostCallback
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.enumeration.RetryType
-import ru.netology.nmedia.R.string.new_posts
-import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.viewmodel.AuthViewModel
 
 
@@ -118,6 +115,7 @@ class FeedFragment : Fragment() {
             adapter.submitList(state.posts) {
                 if (listComparison) binding.list.scrollToPosition(0)
             }
+
             binding.emptyText.isVisible = state.empty
         })
 
@@ -142,7 +140,7 @@ class FeedFragment : Fragment() {
         viewModel.newerCount.observe(viewLifecycleOwner) {
             with(binding.newEntry) {
                 if (it > 0) {
-                    text = "${getString(new_posts)} $it"
+                    text = "${getString(R.string.new_posts)} $it"
                     visibility = View.VISIBLE
                 }
             }

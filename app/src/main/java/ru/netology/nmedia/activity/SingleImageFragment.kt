@@ -1,4 +1,4 @@
-package ru.netology.nmedia
+package ru.netology.nmedia.activity
 
 
 import android.graphics.drawable.ColorDrawable
@@ -8,15 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.fragment_single_image.*
+import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentSingleImageBinding
-import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.utils.Utils
-import ru.netology.nmedia.viewmodel.PostViewModel
 
 
 class SingleImageFragment : Fragment() {
@@ -50,8 +46,12 @@ class SingleImageFragment : Fragment() {
         super.onDestroyView()
         val activity = requireActivity()
         if (activity is AppCompatActivity) {
-            val statusBarColor = ContextCompat.getColor(requireActivity(), R.color.design_default_color_primary_variant)
-            val actionBarColor = ContextCompat.getColor(requireActivity(), R.color.design_default_color_primary)
+            val statusBarColor = ContextCompat.getColor(requireActivity(),
+                R.color.design_default_color_primary_variant
+            )
+            val actionBarColor = ContextCompat.getColor(requireActivity(),
+                R.color.design_default_color_primary
+            )
             activity.window.statusBarColor = statusBarColor
             activity.supportActionBar?.setBackgroundDrawable(ColorDrawable(actionBarColor))
         }
