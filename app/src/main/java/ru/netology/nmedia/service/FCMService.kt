@@ -69,6 +69,6 @@ class FCMService : FirebaseMessagingService() {
 }
 
 data class Push(
-    val recipientId: Long,
+    val recipientId: Long?,
     val content: String
 )
