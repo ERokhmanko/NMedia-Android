@@ -1,5 +1,8 @@
 package ru.netology.nmedia.repository
 
+import android.net.Uri
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import ru.netology.nmedia.api.Api
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.entity.PostEntity
@@ -9,7 +12,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import ru.netology.nmedia.dao.PostWorkDao
 import ru.netology.nmedia.dto.*
+import ru.netology.nmedia.entity.PostWorkEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
@@ -18,7 +23,8 @@ import ru.netology.nmedia.error.UnknownError
 import java.io.IOException
 
 
-class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
+class PostRepositoryImpl(private val postDao: PostDao, private val postWorkDao: PostWorkDao) :
+    PostRepository {
 
     override val data: Flow<List<Post>> = postDao.getAll()
         .map { it.toDto() }
@@ -93,6 +99,53 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
         }
     }
 
+    override suspend fun saveWork(post: Post, upload: MediaUpload?): Long {
+        try {
+            val entity = PostWorkEntity.fromDto(post).apply {
+                if (upload != null) {
+                    this.uri = upload.file.toUri().toString()
+                }
+            }
+            return postWorkDao.insert(entity)
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    override suspend fun processWork(id: Long) {
+        try {
+            val entity = postWorkDao.getById(id)
+            val post = entity.toDto()
+            if (entity.uri != null) {
+                val upload = MediaUpload(Uri.parse(entity.uri).toFile())
+                saveWithAttachment(post, upload)
+            } else {
+                save(post)
+            }
+
+            postWorkDao.removeById(id)
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    override suspend fun save(post: Post) {
+        try {
+            val response = Api.retrofitService.save(post)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            postDao.insert(PostEntity.fromDto(body).copy(viewed = true))
+
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
 
     override fun getNewerCount(id: Long): Flow<Int> = flow {
         while (true) {
@@ -161,22 +214,6 @@ class PostRepositoryImpl(private val postDao: PostDao) : PostRepository {
         }
     }
 
-    override suspend fun save(post: Post) {
-        try {
-            val response = Api.retrofitService.save(post)
-            if (!response.isSuccessful) {
-                throw ApiError(response.code(), response.message())
-            }
-
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
-            postDao.insert(PostEntity.fromDto(body).copy(viewed = true))
-
-        } catch (e: IOException) {
-            throw NetworkError
-        } catch (e: Exception) {
-            throw UnknownError
-        }
-    }
 
     override suspend fun shareById(id: Long) {
         TODO("Not yet implemented")
